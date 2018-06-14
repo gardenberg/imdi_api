@@ -13,7 +13,7 @@ En advarsel: Datasettene er kodet, og kodeboka er foreløpig ikke en del av dett
 
 ## Dokumentasjon
 
-[Tilgjengelig i en R-Notebook her]()
+[Tilgjengelig i en R-Notebook her](https://github.com/gardenberg/imdi_api/blob/master/imdi_api_dokumentasjon.Rmd)
 
 ## Lisens
 Alle data (både fra SSB og IMDi) er tilgjengeliggjort med Norsk lisens for offentlige data (NLOD). Du har lov til:

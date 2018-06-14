@@ -4,7 +4,7 @@ output: github_document
 ---
 
 ## Metadata
-(for å se koden under i en script fil, se [her](lenke))
+(for å se koden under i en script fil, se [her](https://github.com/gardenberg/imdi_api/blob/master/scripts/imdi_api_explore.R))
 En kan sende GET-spørringer for å få vite hvilke tabeller som finnes, og hvilke headere og header-grupper en tabell har. 
 
 ```{r, echo=FALSE}
@@ -75,7 +75,7 @@ head(df)
 
 Hvis APIet gir mer enn 500 svar tilbake, får en med en continuation-token, som må håndteres. Her er en funksjon som ser ut til å gjøre det greit.
 
-(for å se koden under i en script fil, se [her](lenke))
+(for å se koden under i en script fil, se [her](https://github.com/gardenberg/imdi_api/blob/master/scripts/imdi_api_function.R))
 
 ```{r}
 imdi_fetch = function(data){
