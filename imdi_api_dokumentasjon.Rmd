@@ -1,0 +1,131 @@
+---
+title: "IMDIs tall-og-statistikk-API"
+output: github_document 
+---
+
+## Metadata
+(for å se koden under i en script fil, se [her](lenke))
+En kan sende GET-spørringer for å få vite hvilke tabeller som finnes, og hvilke headere og header-grupper en tabell har. 
+
+```{r, echo=FALSE}
+#libraries
+library(httr)
+library(jsonlite)
+library(dplyr)
+```
+
+### Hvilke tabeller finnes
+Henter ut en oversikt over tabeller med GET fra httr-biblioteket, og konverterer det til en data.frame fra JSON med fromJSON fra jsonlite-pakka.
+
+```{r}
+url = "https://imdifakta.azurewebsites.net/api/v1/metadata/tables"
+test_tabeller = GET(url)
+str(test_tabeller)
+df = fromJSON(content(test_tabeller,"text",encoding="UTF-8"))
+df
+```
+
+APIet inneholder p.t. 48 datasett. Navnene er nogenlunde beskrivende for innholdet i hvert enkelt datasett
+
+### Headere
+Hver tabell har "headere", eller variabelnavn, som f.eks. kommune_nr eller kjonn. Duisse kan spesifiseres nærmere i den faktiske spørringa etter data, og det er derfor viktig å vite hvilke alternativer en har. 
+
+```{r}
+url = "https://imdifakta.azurewebsites.net/api/v1/metadata/headers/befolkning_alder"
+test_tabeller = GET(url)
+df = fromJSON(content(test_tabeller,"text",encoding="UTF-8"))
+df$headers
+```
+
+### Header-grupper
+Kanskje vel så viktig som å vite hvilke variabler som er tilgjengelig, er å vite hvilke kombinasjoner av variabler og variabel-verdier som er tilgjengelig. F.eks. har en data på kommune_nr og kjonn (som da er en header-gruppe) separat fra data på fylke_nr og kjonn (som da er en annen header-gruppe). En kan da ikke spørre på kommune_nr og fylke_nr samtidig, så langt jeg veit.
+
+```{r}
+url = "https://imdifakta.azurewebsites.net/api/v1/metadata/headergroups/befolkning_alder"
+test_tabeller = GET(url)
+df = fromJSON(content(test_tabeller,"text",encoding="UTF-8"))
+df
+```
+
+## Faktiske data
+Så til den faktiske data-spørringen. Den sendes med å poste en spørring til en nettadresse. Spørringen er formatert som JSON, det samme som utformatet tilbake.
+
+```{r}
+#henter data fra query-api
+url = "https://imdifakta.azurewebsites.net/api/v1/data/query"
+data = 
+  '{"TableName":"befolkning_hovedgruppe",
+  "Include":
+    ["innvkat5","kjonn","fylkeNr","enhet","aar"],
+    "Conditions":
+      {"innvkat5":["innvandrere","bef_u_innv_og_norskf","norskfodte_m_innvf"],
+      "kjonn":["alle"],
+      "fylkeNr":["00"],
+      "enhet":["personer"]
+    }
+}'
+
+#ma ha med content_type_json() for a fa 200 ok
+test = POST(url,body=data,encode="json",verbose(),content_type_json())
+
+df = fromJSON(content(test,"text",encoding="UTF-8"))
+df = df[[1]]
+head(df)
+```
+
+Hvis APIet gir mer enn 500 svar tilbake, får en med en continuation-token, som må håndteres. Her er en funksjon som ser ut til å gjøre det greit.
+
+(for å se koden under i en script fil, se [her](lenke))
+
+```{r}
+imdi_fetch = function(data){
+  temp_queryresult = POST("https://imdifakta.azurewebsites.net/api/v1/data/query",body=data,encode="json",verbose(),content_type_json())
+  temp_df = fromJSON(content(temp_queryresult,"text",encoding="UTF-8"))
+  if(length(temp_df)==1){
+    return(temp_df[[1]])
+  }
+  if(length(temp_df)>1){
+    temp_df_final = data.frame()
+    temp_df_final = bind_rows(temp_df_final,temp_df[[2]])
+    i = 0
+  }
+  #bruker en while-loop, og det er vel fy?
+  while(length(temp_df)>1){
+    i = i+1
+    temp_token = temp_df$continuation
+    temp_token_format = paste0('{','"continuation":"',temp_token,'",')
+    new_data = substring(data,2,nchar(data)+1)
+    new_data_query =paste0(temp_token_format,new_data)
+    temp_queryresult = POST("https://imdifakta.azurewebsites.net/api/v1/data/query",body=new_data_query,encode="json",verbose(),content_type_json())
+    temp_df = fromJSON(content(temp_queryresult,"text",encoding="UTF-8"))
+    if(length(temp_df)>1){
+      temp_df_final = bind_rows(temp_df_final,temp_df[[2]])
+      Sys.sleep(5) #høfflig å ikke spørre for mange ganger på kort tid, derfor sleep 5 sek.
+    }
+    if(length(temp_df)==1){
+      temp_df_final = bind_rows(temp_df_final,temp_df[[1]])
+      print(paste0("Fullført på ",i," repetisjoner"))
+    }
+  }
+  return(temp_df_final)
+}
+```
+
+
+```{r}
+data = 
+  '{"TableName":"befolkning_hovedgruppe",
+  "Include":
+    ["innvkat5","kjonn","kommuneNr","enhet","aar"],
+    "Conditions":
+      {"innvkat5":["innvandrere","bef_u_innv_og_norskf","norskfodte_m_innvf"],
+      "kjonn":["alle"],
+      "aar": ["2017"],
+      "enhet":["personer"]
+    }
+}'
+
+df=imdi_fetch(data)
+head(df)
+```
+
