@@ -4,7 +4,7 @@ IMDIs tall-og-statistikk-API
 Metadata
 --------
 
-En kan sende GET-spørringer for å få vite hvilke tabeller som finnes, og hvilke headere og header-grupper en tabell har.
+(for å se koden under i en script fil, se [her](https://github.com/gardenberg/imdi_api/blob/master/scripts/imdi_api_explore.R)) En kan sende GET-spørringer for å få vite hvilke tabeller som finnes, og hvilke headere og header-grupper en tabell har.
 
     ## 
     ## Attaching package: 'dplyr'
@@ -39,7 +39,7 @@ str(test_tabeller)
     ##   ..$ expires          : chr "-1"
     ##   ..$ vary             : chr "Accept-Encoding"
     ##   ..$ set-cookie       : chr "ARRAffinity=e86b5a9ea10035046b91043435e597242fe42e87c3ee7cc19502a2c2c7b16b75;Path=/;HttpOnly;Domain=imdifakta.a"| __truncated__
-    ##   ..$ date             : chr "Thu, 14 Jun 2018 07:42:52 GMT"
+    ##   ..$ date             : chr "Thu, 14 Jun 2018 07:53:47 GMT"
     ##   ..- attr(*, "class")= chr [1:2] "insensitive" "list"
     ##  $ all_headers:List of 1
     ##   ..$ :List of 3
@@ -54,7 +54,7 @@ str(test_tabeller)
     ##   .. .. ..$ expires          : chr "-1"
     ##   .. .. ..$ vary             : chr "Accept-Encoding"
     ##   .. .. ..$ set-cookie       : chr "ARRAffinity=e86b5a9ea10035046b91043435e597242fe42e87c3ee7cc19502a2c2c7b16b75;Path=/;HttpOnly;Domain=imdifakta.a"| __truncated__
-    ##   .. .. ..$ date             : chr "Thu, 14 Jun 2018 07:42:52 GMT"
+    ##   .. .. ..$ date             : chr "Thu, 14 Jun 2018 07:53:47 GMT"
     ##   .. .. ..- attr(*, "class")= chr [1:2] "insensitive" "list"
     ##  $ cookies    :'data.frame': 1 obs. of  7 variables:
     ##   ..$ domain    : chr "#HttpOnly_.imdifakta.azurewebsites.net"
@@ -65,8 +65,8 @@ str(test_tabeller)
     ##   ..$ name      : chr "ARRAffinity"
     ##   ..$ value     : chr "e86b5a9ea10035046b91043435e597242fe42e87c3ee7cc19502a2c2c7b16b75"
     ##  $ content    : raw [1:1129] 5b 22 62 65 ...
-    ##  $ date       : POSIXct[1:1], format: "2018-06-14 07:42:52"
-    ##  $ times      : Named num [1:6] 0 0.062 0.093 0.172 0.218 0.218
+    ##  $ date       : POSIXct[1:1], format: "2018-06-14 07:53:47"
+    ##  $ times      : Named num [1:6] 0 0.094 0.125 0.188 0.25 0.25
     ##   ..- attr(*, "names")= chr [1:6] "redirect" "namelookup" "connect" "pretransfer" ...
     ##  $ request    :List of 7
     ##   ..$ method    : chr "GET"
@@ -244,6 +244,8 @@ head(df)
     ## 6 2015      00 bef_u_innv_og_norskf  alle personer        4360839
 
 Hvis APIet gir mer enn 500 svar tilbake, får en med en continuation-token, som må håndteres. Her er en funksjon som ser ut til å gjøre det greit.
+
+(for å se koden under i en script fil, se [her](https://github.com/gardenberg/imdi_api/blob/master/scripts/imdi_api_function.R))
 
 ``` r
 imdi_fetch = function(data){
